@@ -1,152 +1,145 @@
-(function($,sr) {
-	// debouncing function from John Hann
-	// http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
-	var debounce = function (func, threshold, execAsap) {
-		var timeout;
-		return function debounced () {
-			var obj = this, args = arguments;
-			function delayed () {
-				if (!execAsap)
-				                  func.apply(obj, args);
-				timeout = null;
-			}
-			;
-			if (timeout)
-			              clearTimeout(timeout); else if (execAsap)
-			              func.apply(obj, args);
-			timeout = setTimeout(delayed, threshold || 100);
-		}
-		;
-	}
-	// smartresize 
-	jQuery.fn[sr] = function(fn) {
-		return fn ? this.bind('resize', debounce(fn)) : this.trigger(sr);
-	}
-	;
-}
-)(jQuery,'smartresize');
+(function ($) {
 
-
-$(document).ready(function() {
-	///////////////////////////////
-	// Set Home Slideshow Height
-	///////////////////////////////
-	function setHomeBannerHeight() {
-		var windowHeight = jQuery(window).height();
-		jQuery('#header').height(windowHeight);
-	}
-	///////////////////////////////
-	// Center Home Slideshow Text
-	///////////////////////////////
-	function centerHomeBannerText() {
-		var bannerText = jQuery('#header > .center');
-		var bannerTextTop = ((jQuery('#header').actual('height') - jQuery('#header .bottom').actual('height'))/2) - (jQuery('#header > .center').actual('height')/2) + + jQuery('#menu').actual('height');
-		bannerText.css('padding-top', bannerTextTop+'px');
-		bannerText.show();
-	}
-	setHomeBannerHeight();
-	centerHomeBannerText();
-	//Resize events
-	jQuery(window).smartresize(function() {
-		setHomeBannerHeight();
-		centerHomeBannerText();
-	});
-	
-	function scroll() {
-		if ($(window).scrollTop() == 0 ) {
-			//$('.nav > li').removeClass('active');
-			console.log($(window).scrollTop());
-		} else {
-			
-		}
-	}
-	document.onscroll = scroll;
-	var $scrollDownArrow = $('#scrollDownArrow');
-	var animateScrollDownArrow = function() {
-		$scrollDownArrow.animate( {
-			top: 5,
-		}
-		, 400, "linear", function() {
-			$scrollDownArrow.animate( {
-				top: -5,
+	$(window).scroll(function(){
+		if ($(this).scrollTop() > 100) {
+			$('.scrollup').fadeIn();
+			} else {
+				$('.scrollup').fadeOut();
 			}
-			, 400, "linear", function() {
-				animateScrollDownArrow();
-			}
-			);
 		});
-	}
-	animateScrollDownArrow();
-	//Set Down Arrow Button
-	jQuery('#scrollDownArrow').click(function(e) {
-		e.preventDefault();
-		jQuery.scrollTo("#video", 1000, {
-			offset:-(jQuery('#header #menu').height()), axis:'y'
-		}
-		);
-	});
-	jQuery('.nav > li > a, #logo a').click(function(e) {
-		e.preventDefault();
+		$('.scrollup').click(function(){
+			$("html, body").animate({ scrollTop: 0 }, 1000);
+				return false;
+		});
+	
+	// local scroll
+	jQuery('.navbar').localScroll({hash:true, offset: {top: 0},duration: 800, easing:'easeInOutExpo'});
 
-		jQuery.scrollTo(jQuery(this).attr('href'), 400, {
-			offset:-(jQuery('#header #menu').height()), axis:'y'
-		}
-		);
-	});
+	
+	// portfolio
+    if($('.isotopeWrapper').length){
 
-
-
-	//jQuery('.giant-heading, .condensed').fitText();
-
-
-});
-
-
-
-/*---------------   Social Button tooltip ---------------*/
-
-
-$(document).ready(function() {
-	$(function () {
-	  $('[data-toggle="tooltip"]').tooltip()
-	})
-});
-
-
-
-/*------------------------------------------
- Subscribe form ajax
- ------------------------------------------*/
-
-
-$('#subscription-form').submit(function(e) {
-
-    e.preventDefault();
-    var $form           = $('#subscription-form');
-    var submit          = $('#subscribe-button');
-    var ajaxResponse    = $('#subscription-response');
-    var email           = $('#subscriber-email').val();
-
-    $.ajax({
-        type: 'POST',
-        url: 'php/subscribe.php',
-        dataType: 'json',
-        data: {
-            email: email
-        },
-        cache: false,
-        beforeSend: function(result) {
-            submit.val("Joining...");
-        },
-        success: function(result) {
-            if(result.sendstatus == 1) {
-                ajaxResponse.html(result.message);
-                $form.fadeOut(500);
-            } else {
-                ajaxResponse.html(result.message);
-                submit.val("Get it!");
+        var $container = $('.isotopeWrapper');
+        var $resize = $('.isotopeWrapper').attr('id');
+        // initialize isotope
+        
+        $container.isotope({
+            itemSelector: '.isotopeItem',
+            resizable: false, // disable normal resizing
+            masonry: {
+                columnWidth: $container.width() / $resize
             }
-        }
-    });
 
-});
+
+            
+        });
+
+        $('#filter a').click(function(){
+
+
+
+            $('#filter a').removeClass('current');
+            $(this).addClass('current');
+            var selector = $(this).attr('data-filter');
+            $container.isotope({
+                filter: selector,
+                animationOptions: {
+                    duration: 1000,
+                    easing: 'easeOutQuart',
+                    queue: false
+                }
+            });
+            return false;
+        });
+        
+        
+        $(window).smartresize(function(){
+            $container.isotope({
+                // update columnWidth to a percentage of container width
+                masonry: {
+                    columnWidth: $container.width() / $resize
+                }
+            });
+        });
+        
+
+}  
+
+
+	// fancybox
+	jQuery(".fancybox").fancybox();
+
+
+	if (Modernizr.mq("screen and (max-width:1024px)")) {
+			jQuery("body").toggleClass("body");
+			
+	} else {
+		var s = skrollr.init({
+			mobileDeceleration: 1,
+			edgeStrategy: 'set',
+			forceHeight: true,
+			smoothScrolling: true,
+			smoothScrollingDuration: 300,
+				easing: {
+					WTF: Math.random,
+					inverted: function(p) {
+						return 1-p;
+					}
+				}
+			});	
+	}
+
+
+
+	//scroll menu
+	jQuery('.appear').appear();
+	jQuery(".appear").on("appear", function(data) {
+			var id = $(this).attr("id");
+			jQuery('.nav li').removeClass('active');
+			jQuery(".nav a[href='#" + id + "']").parent().addClass("active");					
+		});
+
+
+		//parallax
+        var isMobile = false;
+
+        if(Modernizr.mq('only all and (max-width: 1024px)') ) {
+            isMobile = true;
+        }
+
+        
+        if (isMobile == false && ($('#parallax1').length  ||isMobile == false &&  $('#parallax2').length ||isMobile == false &&  $('#testimonials').length))
+        {
+
+
+            $(window).stellar({
+                responsive:true,
+                scrollProperty: 'scroll',
+                parallaxElements: false,
+                horizontalScrolling: false,
+                horizontalOffset: 0,
+                verticalOffset: 0
+            });
+
+        }
+    
+    //Google Map
+    var get_latitude = $('#google-map').data('latitude');
+    var get_longitude = $('#google-map').data('longitude');
+
+    function initialize_google_map() {
+        var myLatlng = new google.maps.LatLng(get_latitude, get_longitude);
+        var mapOptions = {
+            zoom: 14,
+            scrollwheel: false,
+            center: myLatlng
+        };
+        var map = new google.maps.Map(document.getElementById('google-map'), mapOptions);
+        var marker = new google.maps.Marker({
+            position: myLatlng,
+            map: map
+        });
+    }
+    google.maps.event.addDomListener(window, 'load', initialize_google_map);
+
+})(jQuery);
